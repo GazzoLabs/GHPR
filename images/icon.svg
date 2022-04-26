@@ -1,0 +1,10 @@
+<svg version="1.1"
+     baseProfile="full"
+     width="256" height="256"
+     xmlns="http://www.w3.org/2000/svg">
+
+    <!--    https://coolors.co/461220-8c2f39-b23a48-fcb9b2-fed0bb-->
+    <circle cx="128" cy="128" r="119" fill="#461220" stroke="#FCB9B2" stroke-width="16"/>
+    <circle cx="75.395" cy="180.605" r="66.395" fill="#8C2F39" stroke="#FCB9B2" stroke-width="16"/>
+    <circle cx="167.244" cy="88.755" r="12" fill="#FCB9B2"/>
+</svg>

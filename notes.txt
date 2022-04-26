@@ -1,0 +1,4 @@
+for i in 16 32 48 64 128
+do
+convert -background none -resize ${i}x${i} icon.svg icon-${i}x${i}.png
+done

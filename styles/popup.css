@@ -1,0 +1,15 @@
+#GHPR-popup {
+    background-color: #22272e;
+    color: #adbac7;
+    white-space: nowrap
+}
+
+#GHPR-checkboxes ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#GHPR-checkboxes input[type=checkbox] {
+    accent-color: #99c8ff;
+}
