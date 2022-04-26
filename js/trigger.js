@@ -1,5 +1,3 @@
-// import {tree, resizer} from './hack'
-
 function loadOnFilesBucket() {
     var waitingForFilesBucket = new MutationObserver( function ( mutations, me ) {
         var filesBucketAppeared = mutations.flatMap( m => [...m.addedNodes] ).filter( i => i.nodeType <= 2 ).filter( i => i.id === "files_bucket" )
@@ -8,7 +6,6 @@ function loadOnFilesBucket() {
             console.log("'files_bucket' found.")
             let filesBucket = filesBucketAppeared[0]
             extend(filesBucket)
-            // vis()
         }
     })
 
@@ -21,14 +18,11 @@ function loadOnFilesBucket() {
     if (filesBucket != null){
         waitingForFilesBucket.disconnect();
         extend(filesBucket)
-        // vis()
-        return
     }
 }
 
 function loadOnTitleChange() {
     let titleObserver = new MutationObserver(function (mutations, me) {
-        // let titleAppeared = mutations.flatMap( m => [...m.addedNodes] ).filter( i => i.nodeType < 2 ).filter( i => i.tagName == "TITLE" )
         let titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType == 3)
         if (titleAppeared.length > 0) {
             console.log("'title' changed.")
@@ -45,9 +39,7 @@ function loadOnTitleChange() {
 
 function loadOnTitleAppears() {
     let titleObserver = new MutationObserver(function (mutations, me) {
-        // debugger
         let titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType < 2).filter(i => i.tagName == "TITLE")
-        // let titleAppeared = mutations.flatMap( m => [...m.addedNodes] ).filter( i => i.nodeType == 3 )
         if (titleAppeared.length > 0) {
             console.log("'title' node appeared.")
             me.disconnect()
