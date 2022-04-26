@@ -1,7 +1,7 @@
 function loadOnFilesBucket() {
-    var waitingForFilesBucket = new MutationObserver( function ( mutations, me ) {
-        var filesBucketAppeared = mutations.flatMap( m => [...m.addedNodes] ).filter( i => i.nodeType <= 2 ).filter( i => i.id === "files_bucket" )
-        if ( filesBucketAppeared.length > 0 ) {
+    const waitingForFilesBucket = new MutationObserver(function (mutations, me) {
+        const filesBucketAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType <= 2).filter(i => i.id === "files_bucket");
+        if (filesBucketAppeared.length > 0) {
             me.disconnect()
             console.log("'files_bucket' found.")
             let filesBucket = filesBucketAppeared[0]
@@ -9,13 +9,13 @@ function loadOnFilesBucket() {
         }
     })
 
-    waitingForFilesBucket.observe( document, {
+    waitingForFilesBucket.observe(document, {
         childList: true,
         subtree: true
-    } )
+    })
 
     let filesBucket = document.getElementById("files_bucket");
-    if (filesBucket != null){
+    if (filesBucket != null) {
         waitingForFilesBucket.disconnect();
         extend(filesBucket)
     }
@@ -23,7 +23,7 @@ function loadOnFilesBucket() {
 
 function loadOnTitleChange() {
     let titleObserver = new MutationObserver(function (mutations, me) {
-        let titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType == 3)
+        let titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType === 3)
         if (titleAppeared.length > 0) {
             console.log("'title' changed.")
             loadOnFilesBucket()
@@ -39,7 +39,7 @@ function loadOnTitleChange() {
 
 function loadOnTitleAppears() {
     let titleObserver = new MutationObserver(function (mutations, me) {
-        let titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType < 2).filter(i => i.tagName == "TITLE")
+        let titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType < 2).filter(i => i.tagName === "TITLE")
         if (titleAppeared.length > 0) {
             console.log("'title' node appeared.")
             me.disconnect()
