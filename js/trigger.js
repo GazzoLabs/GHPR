@@ -1,22 +1,22 @@
 function loadOnFilesBucket() {
-    const waitingForFilesBucket = new MutationObserver(function (mutations, me) {
+    const filesBucketObserver = new MutationObserver(function (mutations, me) {
         const filesBucketAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType <= 2).filter(i => i.id === "files_bucket");
         if (filesBucketAppeared.length > 0) {
             me.disconnect()
             console.log("'files_bucket' found.")
-            let filesBucket = filesBucketAppeared[0]
+            const filesBucket = filesBucketAppeared[0]
             extend(filesBucket)
         }
     })
 
-    waitingForFilesBucket.observe(document, {
+    filesBucketObserver.observe(document, {
         childList: true,
         subtree: true
     })
 
     const filesBucket = document.getElementById("files_bucket");
     if (filesBucket != null) {
-        waitingForFilesBucket.disconnect();
+        filesBucketObserver.disconnect();
         extend(filesBucket)
     }
 }
@@ -41,8 +41,9 @@ function loadOnTitleAppears() {
         if (titleAppeared.length > 0) {
             console.log("'title' node appeared.")
             me.disconnect()
+            // Belt and suspenders...
             loadOnTitleChange()
-            loadOnFilesBucket() // TODO ?
+            loadOnFilesBucket()
         }
     })
 
