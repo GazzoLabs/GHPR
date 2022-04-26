@@ -9,7 +9,7 @@ let options;
 // }
 
 /**
- * Adds the css some iff it does not already exists.
+ * Adds the css some iff it does not already exist.
  * If it exists, boolean value @p overwrite will decide if we actually rewrite the @p cssText.
  * @param cssText The new css text.
  * @param overwrite Will we overwrite the already existing css (in case the style already exists).
@@ -114,7 +114,7 @@ function setDisplay(node, isReviewed) {
  * Sets the display of the `folderNode` element, depending on global `options` and the current `isReviewed` state.
  * The function also deals with potential folding.
  * @param folderNode A folder node (that can be folded). Not meant to be a folder sub-graph.
- * @param isReviewed The current review state of the `folderNode`.
+ * @param isFolderReviewed The current review state of the `folderNode`.
  */
 function setFolderDisplay(folderNode, isFolderReviewed) {
     setDisplay(folderNode, isFolderReviewed)
