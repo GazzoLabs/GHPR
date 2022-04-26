@@ -9,10 +9,6 @@ function f(event) {
     });
 }
 
-// document.addEventListener("DOMContentLoaded", function () {
-//     document.getElementById("tree_reviewed_style_id").addEventListener("click", f)
-// })
-
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("GHPR-checkboxes").addEventListener("click", f)
 })

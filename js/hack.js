@@ -1,19 +1,3 @@
-// ==UserScript==
-// @name         Resize tree
-// @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  try to take over the world!
-// @author       You
-// @match        https://github.com/*
-// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
-// @grant        GM_addStyle
-// @run-at       document-start
-// ==/UserScript==
-
-// function extractIdFromViewedButton(button) {
-//     return button.parentNode.id ? button.parentNode.id : extractIdFromViewedButton(button.parentNode)
-// }
-
 // global variable that stores the options.
 var options;
 // var options = {
@@ -112,10 +96,7 @@ function setFolderDisplay(folderNode, isFolderReviewed) {
         return (isFolderReviewed && ! isFolderFolded) || (! isFolderReviewed && isFolderFolded)
     }
 
-    // const isFolderFolded = isFolded(folderNode)
-    // const shouldClick = (isFolderReviewed && ! isFolderFolded) || (! isFolderReviewed && isFolderFolded)
     if (shouldClick()){
-        // debugger
         folderNode.click()
         // Safety check
         if (shouldClick()) {
@@ -145,16 +126,6 @@ function getChildrenOfFolder(folderGraph) {
     return children
 }
 
-// function computeAndSetFoldersDisplay(folderGraph) {
-//     if (folderGraph == null) return
-//     var folderNode = getFolderNode(folderGraph)
-//     var childrenOfFolder = getChildrenOfFolder(folderGraph)
-//     var isFolderReviewed = Array.from(childrenOfFolder).every(isReviewed)
-//     setFolderDisplay(folderNode, isFolderReviewed)
-//     // Go up, whatever the state // TODO stop if state has not changed...
-//     computeAndSetFoldersDisplay(findParentFolder(folderGraph))
-// }
-
 function computeAndSetFoldersDisplay(folderGraph) {
     if (folderGraph == null) return
     var folderNode = getFolderNode(folderGraph)
@@ -163,12 +134,7 @@ function computeAndSetFoldersDisplay(folderGraph) {
     var isFolderReviewed = Array.from(childrenOfFolder).every(isReviewed)
     setFolderDisplay(folderNode, isFolderReviewed)
     computeAndSetFoldersDisplay(findParentFolder(folderGraph))
-    // if (isFolderNodeInReviewedState != isFolderReviewed){
-    //     setFolderDisplay(folderNode, isFolderReviewed)
-    //     computeAndSetFoldersDisplay(findParentFolder(folderGraph))
-    // }
 }
-
 
 /**
  * Adds the observer that will modify the tree when the review status of a file changes.
@@ -198,44 +164,12 @@ function tree(filesBucket){
     })
 }
 
-function px2int(w) {
-    return parseInt(w.slice(0, -2), 10)
-}
-
-function reviewFolder(folderNode) {
-    document.querySelectorAll("[action=\"/GEOSX/GEOSX/pull/1880/file_review\"]") // Use the current URL?
-    // addStyle button.ActionList-content width=...
-}
-
 function resizer(filesBucket) {
     if (options.autoResizeSideBar) {
         var customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: auto;}')
         let fileTreeFilterField = document.getElementById("file-tree-filter-field")
         if (!fileTreeFilterField) return
         var originalStyle = getComputedStyle(fileTreeFilterField)
-        // debugger
-        // var toto = document.querySelector('.Layout--flowRow-until-lg[side="left"]')
-        // const w = getComputedStyle(toto.childNodes[1]).width
-        // const w = getComputedStyle(toto).gridTemplateColumns.split(" ")[0]
-        // const w2 = getComputedStyle(toto.children[0]).width
-        // const m = getComputedStyle(toto.children[0]).marginRight
-        // const w = px2int(w2) - px2int(m)
-        // addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: '+ w + 'px}', true);
-
-
-
-
-        // const w = toto.children[0].clientWidth
-        // addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: '+ w + '}', true);
-        // const originalWidth = px2int(originalStyle.width)
-        // const iconWidth = [...filesBucket.querySelectorAll(".ActionList-item-visual--trailing")].map(n => getComputedStyle(n).width).map(px2int).reduce((a, b) => Math.max(a, b), -Infinity)
-        // const hasFilesOverflowing = [...filesBucket.querySelectorAll('.ActionList-item--subItem')].filter(n => n.scrollWidth < n.clientWidth).length > 0
-        // const gitMarginRight = hasFilesOverflowing ? [...filesBucket.querySelectorAll(".ActionList-item-label--truncate")].map(n => getComputedStyle(n).marginRight).map(px2int).reduce((a, b) => Math.max(a, b), -Infinity) : 0;
-
-        // addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: '+ originalStyle.width + '}', true);
-        // const w = originalWidth + iconWidth + gitMarginRight
-        // addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: '+ w + 'px}', true);
-
     } else {
         let fileTreeFilterField = document.getElementById("file-tree-filter-field")
         if (!fileTreeFilterField) return
@@ -289,79 +223,3 @@ function extend(filesBucket) {
     tree(filesBucket)
     resizer(filesBucket)
 }
-
-// function loadOnFilesBucket() {
-//     var waitingForFilesBucket = new MutationObserver( function ( mutations, me ) {
-//         var filesBucketAppeared = mutations.flatMap( m => [...m.addedNodes] ).filter( i => i.nodeType <= 2 ).filter( i => i.id === "files_bucket" )
-//         if ( filesBucketAppeared.length > 0 ) {
-//             me.disconnect()
-//             console.log("'files_bucket' found.")
-//             tree(filesBucketAppeared[0])
-//             resizer(filesBucketAppeared[0])
-//             // vis()
-//         }
-//     })
-//
-//     waitingForFilesBucket.observe( document, {
-//         childList: true,
-//         subtree: true
-//     } )
-//
-//     let filesBucket = document.getElementById("files_bucket");
-//     if (filesBucket != null){
-//         waitingForFilesBucket.disconnect();
-//         tree(filesBucket)
-//         resizer(filesBucket)
-//         // vis()
-//         return
-//     }
-// }
-//
-// function loadOnTitleChange() {
-//     let titleObserver = new MutationObserver(function (mutations, me) {
-//         // let titleAppeared = mutations.flatMap( m => [...m.addedNodes] ).filter( i => i.nodeType < 2 ).filter( i => i.tagName == "TITLE" )
-//         let titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType == 3)
-//         if (titleAppeared.length > 0) {
-//             loadOnFilesBucket()
-//         }
-//     })
-//
-//     titleObserver.observe(document.querySelector("head").querySelector("title"), {
-//         childList: true
-//     })
-//
-//     loadOnFilesBucket()
-// }
-//
-// function loadOnTitleAppears() {
-//     let titleObserver = new MutationObserver(function (mutations, me) {
-//         // debugger
-//         let titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType < 2).filter(i => i.tagName == "TITLE")
-//         // let titleAppeared = mutations.flatMap( m => [...m.addedNodes] ).filter( i => i.nodeType == 3 )
-//         if (titleAppeared.length > 0) {
-//             console.log("'title' node appeared.")
-//             me.disconnect()
-//             loadOnTitleChange()
-//         }
-//     })
-//
-//     titleObserver.observe(document.documentElement, {
-//         childList: true,
-//         subtree: true
-//     })
-//
-//     // loadOnTitleChange() // Please remove!
-// }
-//
-// function main() {
-//     'use strict';
-//     console.log("Loading the GitHub PR script")
-//
-//     chrome.storage.local.get(['tree_reviewed_style'], function (result) {
-//         hideReviewedNode = result.tree_reviewed_style == 'hide'
-//     });
-//
-//     loadOnTitleAppears()
-// }
-//
-// main()
