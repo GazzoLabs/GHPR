@@ -62,7 +62,7 @@ function main() {
     chrome.storage.local.get("options", function (result) {
         // console.log("toto")
         options = {
-            hideReviewedNode: result.options["Hide_reviewed_node"],
+            hideReviewedNode: result.options["Hide reviewed node"],
             strikeThrough: result.options["Strike through reviewed file"],
             foldReviewedFolder: result.options["Fold reviewed folder"],
             autoResizeSideBar: result.options["Auto resize sidebar"],
