@@ -14,7 +14,7 @@ function loadOnFilesBucket() {
         subtree: true
     })
 
-    let filesBucket = document.getElementById("files_bucket");
+    const filesBucket = document.getElementById("files_bucket");
     if (filesBucket != null) {
         waitingForFilesBucket.disconnect();
         extend(filesBucket)
@@ -22,8 +22,8 @@ function loadOnFilesBucket() {
 }
 
 function loadOnTitleChange() {
-    let titleObserver = new MutationObserver(function (mutations, me) {
-        let titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType === 3)
+    const titleObserver = new MutationObserver(function (mutations, me) {
+        const titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType === 3)
         if (titleAppeared.length > 0) {
             console.log("'title' changed.")
             loadOnFilesBucket()
@@ -36,8 +36,8 @@ function loadOnTitleChange() {
 }
 
 function loadOnTitleAppears() {
-    let titleObserver = new MutationObserver(function (mutations, me) {
-        let titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType < 2).filter(i => i.tagName === "TITLE")
+    const titleObserver = new MutationObserver(function (mutations, me) {
+        const titleAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType < 2).filter(i => i.tagName === "TITLE")
         if (titleAppeared.length > 0) {
             console.log("'title' node appeared.")
             me.disconnect()
