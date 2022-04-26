@@ -39,7 +39,11 @@ function addStyle(cssText, overwrite = false, id = 'GHPR-sidebar') {
     return null
 }
 
-// Returns a folderGraph (or null)
+/**
+ * Find the parent sub-graph of `folderGraph`.
+ * @param fileTreeEntry The html tree entry. The algo will recursively extract the html parent until it finds a folder sub-graph.
+ * @returns A html file tree entry. The recursive algo will stop when a folder sub-graph is found. Or null when we're on top of the tree.
+ */
 function findParentFolder(fileTreeEntry) { // TODO -> rename node + return null and deal with it + does it return a node or a graph?
     // If it's the root node, then there is no more father.
     // Note that `root` node is not a folder or file node.
@@ -55,6 +59,11 @@ function findParentFolder(fileTreeEntry) { // TODO -> rename node + return null 
     }
 }
 
+/**
+ * Returns the text of any tree node.
+ * @param node
+ * @returns {string}
+ */
 function getText(node) {
     try {
         const txt = node.querySelector(".ActionList-item-label");
@@ -65,39 +74,63 @@ function getText(node) {
     }
 }
 
+/**
+ * Extracts the folder node from the folder sub-graph
+ * @param folderGraph The folder sub-graph which root node will be returned
+ * @returns An Element
+ */
 function getFolderNode(folderGraph) {
     return folderGraph.querySelector("button")
 }
 
+/**
+ * Checks if a folder node is folded or not.
+ * @param folderNode The node that can be folded.
+ * @returns {boolean}
+ */
 function isFolded(folderNode) {
     return folderNode.getAttribute("aria-expanded") === "false"
 }
 
+/**
+ * Sets the display of the `node` element, depending on global `options` and the current `isReviewed` state
+ * @param node The node (can be a folder node, not meant to be a folder sub-graph)
+ * @param isReviewed The current review state of the `node`.
+ */
 function setDisplay(node, isReviewed) {
-    // const hideReviewedNode = false
-    if (options.hideReviewedNode) node.style.display = isReviewed ? "none" : ""
+    if (options.hideReviewedNode) {
+        node.style.display = isReviewed ? "none" : ""
+    }
     let txt = node.querySelector(".ActionList-item-label")
     if (options.strikeThrough) {
         txt.style.textDecoration = isReviewed ? "line-through" : ""
     }
-    // TODO deal with options
     txt.style.color = isReviewed ? "var(--color-fg-subtle)" : ""
 
     console.log("".concat("Node '", getText(node), "' set to status ", isReviewed ? "'reviewed'" : "'non reviewed'"))
 }
 
+/**
+ * Sets the display of the `folderNode` element, depending on global `options` and the current `isReviewed` state.
+ * The function also deals with potential folding.
+ * @param folderNode A folder node (that can be folded). Not meant to be a folder sub-graph.
+ * @param isReviewed The current review state of the `folderNode`.
+ */
 function setFolderDisplay(folderNode, isFolderReviewed) {
     setDisplay(folderNode, isFolderReviewed)
 
-    // TODO deal with options
     function shouldClick() {
-        const isFolderFolded = isFolded(folderNode)
-        return (isFolderReviewed && !isFolderFolded) || (!isFolderReviewed && isFolderFolded)
+        if (options.foldReviewedFolder){
+            const isFolderFolded = isFolded(folderNode)
+            return (isFolderReviewed && !isFolderFolded) || (!isFolderReviewed && isFolderFolded)
+        } else {
+            return false
+        }
     }
 
     if (shouldClick()) {
         folderNode.click()
-        // Safety check
+        // Sometimes `click` is not ready, so I fall back to attribute definition by hand (but I don't like it).
         if (shouldClick()) {
             const tmp = folderNode.getAttribute("aria-expanded")
             folderNode.setAttribute("aria-expanded", !tmp)
@@ -106,30 +139,42 @@ function setFolderDisplay(folderNode, isFolderReviewed) {
     }
 }
 
+/**
+ * Returns the review state of the `node`. Useful when walking the graph with folders.
+ * @param node The node (can be a folder node, not meant to be a folder sub-graph)
+ * @returns {boolean}
+ */
 function isReviewed(node) {
-    // TODO deal with options
     if (node.getAttribute("data-tree-entry-type") === "file") {
         return node.hasAttribute("data-file-user-viewed")
     } else {
-        // In case of directories, we rely on our line-trough information (GH does not tag directories)
-        let txt = node.querySelector(".ActionList-item-label")
-        return txt.style.textDecoration === "line-through"
+        // In case of directories, we rely on our "dim" information (GitHub does not tag directories)
+        // Dimming is not optional, so we do not have to deal with `options`.
+        const txt = node.querySelector(".ActionList-item-label")
+        return txt.style.color === "var(--color-fg-subtle)"
     }
 }
 
-// Extracts the first level children of a folder sub graph in the tree.
+/**
+ * Extracts the first level children of a folder sub graph in the tree.
+ * @param folderGraph The folder sub graph (not meant to be a folder node).
+ * @returns The first level children of the root node of the folder sub graph.
+ */
 function getChildrenOfFolder(folderGraph) {
     // TODO make a cleaner recursive algo? At least here, we fear no "infinite" loop.
     const level = parseInt(folderGraph.getAttribute('aria-level'));
-    return folderGraph.querySelectorAll('li[aria-level="' + (level + 1).toString() + '"]')
+    const children = folderGraph.querySelectorAll('li[aria-level="' + (level + 1).toString() + '"]')
+    return Array.from(children)
 }
 
+/**
+ * Recursively upward (in the parent direction) compute the display of folders.
+ * @param folderGraph The folder root to start with. Parents will be considered until there is no more parent.
+ */
 function computeAndSetFoldersDisplay(folderGraph) {
     if (folderGraph == null) return
-    const folderNode = getFolderNode(folderGraph);
-    // const isFolderNodeInReviewedState = isReviewed(folderNode)
-    const childrenOfFolder = getChildrenOfFolder(folderGraph);
-    const isFolderReviewed = Array.from(childrenOfFolder).every(isReviewed);
+    const folderNode = getFolderNode(folderGraph)
+    const isFolderReviewed = getChildrenOfFolder(folderGraph).every(isReviewed)
     setFolderDisplay(folderNode, isFolderReviewed)
     computeAndSetFoldersDisplay(findParentFolder(folderGraph))
 }
@@ -139,7 +184,7 @@ function computeAndSetFoldersDisplay(folderGraph) {
  * Also performs a first pass when the page is loaded such that we start with tree in sync.
  * @param filesBucket The `#files_bucket` element.
  */
-function tree(filesBucket) {
+function setTreeObservers(filesBucket) {
     const nodesObserver = new MutationObserver(function (mutations, me) {
         // For js noobs like me: `.filter(x => x)` filters null values.
         const newNodes = mutations.filter(m => m.attributeName === "data-file-user-viewed").map(m => m.target).filter(li => li.id.startsWith("file-tree-item-diff-"));
@@ -162,9 +207,8 @@ function tree(filesBucket) {
     })
 }
 
-function resizer(filesBucket) {
-    let originalStyle;
-    let customCss;
+function setResizerObservers(filesBucket) {
+    let originalStyle, customCss;
     if (options.autoResizeSideBar) {
         customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: auto;}');
         const fileTreeFilterField = document.getElementById("file-tree-filter-field")
@@ -182,7 +226,7 @@ function resizer(filesBucket) {
         sideBar.style.borderRightStyle = "solid";
         sideBar.style.borderRightColor = originalStyle.borderColor;
 
-        var startX, startWidth;
+        let startX, startWidth;
 
         function initDrag(event) {
             if (event.which !== 1) return // left click
@@ -209,17 +253,6 @@ function resizer(filesBucket) {
 }
 
 function extend(filesBucket) {
-    // chrome.storage.local.get("options", function (result) {
-    //     options = {
-    //         hideReviewedNode: result.options["Hide_reviewed_node"],
-    //         strikeThrough: result.options["Strike through reviewed file"],
-    //         foldReviewedFolder: result.options["Fold reviewed folder"],
-    //         autoResizeSideBar: result.options["Auto resize sidebar"],
-    //         setResizeableSideBar: result.options["Set sidebar resizeable"]
-    //     }
-    //     tree(filesBucket)
-    //     resizer(filesBucket)
-    // })
-    tree(filesBucket)
-    resizer(filesBucket)
+    setTreeObservers(filesBucket)
+    setResizerObservers(filesBucket)
 }

@@ -33,8 +33,6 @@ function loadOnTitleChange() {
     titleObserver.observe(document.querySelector("head").querySelector("title"), {
         childList: true
     })
-
-    // loadOnFilesBucket() // TODO ?
 }
 
 function loadOnTitleAppears() {
@@ -52,20 +50,11 @@ function loadOnTitleAppears() {
         childList: true,
         subtree: true
     })
-
-    // loadOnTitleChange() // Please remove!
 }
 
 function main() {
     'use strict';
     console.log("Loading the GitHub PR script")
-
-    // chrome.storage.local.get(['tree_reviewed_style'], function (result) {
-    //     // hideReviewedNode = result.tree_reviewed_style == 'hide'
-    //     options.hideReviewedNode = result.tree_reviewed_style == 'hide'
-    // });
-    // options.hideReviewedNode = false
-    // options.strikeThrough = true
 
     loadOnTitleAppears()
     // Loading the options before we add our listeners, resize the sidebar, etc.
@@ -78,8 +67,6 @@ function main() {
             autoResizeSideBar: result.options["Auto resize sidebar"],
             setResizeableSideBar: result.options["Set sidebar resizeable"]
         }
-        // debugger
-        // loadOnTitleAppears()
     })
 
 }
