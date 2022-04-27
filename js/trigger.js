@@ -66,7 +66,8 @@ function main() {
             strikeThrough: result.options["Strike through reviewed file"],
             foldReviewedFolder: result.options["Fold reviewed folder"],
             autoResizeSideBar: result.options["Auto resize sidebar"],
-            setResizeableSideBar: result.options["Set sidebar resizeable"]
+            setResizeableSideBar: result.options["Set sidebar resizeable"],
+            visibilityIndicator: result.options["Highlight visible files in tree"]
         }
     })
 
