@@ -207,6 +207,44 @@ function setTreeObservers(filesBucket) {
     })
 }
 
+
+function setVisibilityObservers(filesBucket, threshold = 0.001) {
+    const topMargin = getComputedStyle(document.querySelector(".pr-toolbar")).minHeight
+
+    const intersectionObserver = new IntersectionObserver(es => { // IntersectionObserverEntry list
+        Array.from(es).forEach(e => {
+            const targetId = e.target.id
+            const treeId = "file-tree-item-" + targetId
+            let fileNode = document.getElementById(treeId)
+            if (fileNode) {
+                fileNode.style.background = (e.intersectionRatio < threshold) || (isReviewed(fileNode)) ? "": "var(--color-action-list-item-default-selected-bg)"
+            }
+        })
+    }, {
+        root: null,
+        rootMargin: '-' + topMargin + ' 0px 0px 0px',
+        threshold: threshold
+    })
+
+    const reviewIds = [...filesBucket.querySelectorAll('li')].filter(li => li.id.startsWith("file-tree-item-diff-")).map(li => li.id.substring(15))
+
+    const idsObserver = new MutationObserver(function (mutations, me) {
+        const idsAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType <= 2).filter(i => reviewIds.includes(i.id))
+        idsAppeared.forEach(i => intersectionObserver.observe(i))
+    })
+
+    idsObserver.observe(filesBucket, { // TODO Use document.getElementById("files")
+        childList: true,
+        subtree: true
+    })
+
+    reviewIds.forEach(id => {
+        const e = document.getElementById(id)
+        if (e) intersectionObserver.observe(e)
+    })
+}
+
+
 function setResizerObservers(filesBucket) {
     let originalStyle, customCss;
     if (options.autoResizeSideBar) {
@@ -255,4 +293,5 @@ function setResizerObservers(filesBucket) {
 function extend(filesBucket) {
     setTreeObservers(filesBucket)
     setResizerObservers(filesBucket)
+    setVisibilityObservers(filesBucket)
 }
