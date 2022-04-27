@@ -1,11 +1,12 @@
 // global variable that stores the options.
 let options;
 // var options = {
-//     hideReviewedNode: false,
-//     strikeThrough: true,
-//     foldReviewedFolder: true,
-//     autoResizeSideBar: true,
-//     setResizeableSideBar: true
+//     hideReviewedNode: bool
+//     strikeThrough: bool
+//     foldReviewedFolder: bool
+//     autoResizeSideBar: bool
+//     setResizeableSideBar: bool
+//     visibilityIndicator: bool
 // }
 
 /**
@@ -209,7 +210,11 @@ function setTreeObservers(filesBucket) {
     })
 }
 
-
+/**
+ * Sets all the observers required to indicaqte in the tree the diff/comparison boxes are visibile on the right.
+ * @param filesBucket The `#files_bucket` element.
+ * @param threshold A small numerical precision to check if a box is visible or not.
+ */
 function setVisibilityObservers(filesBucket, threshold = 0.001) {
     // The topMargin is here because the diff/comparison boxes can hide behind the top ribbon.
     // Extracting the height of this ribbon will help us reduce the window size.
@@ -313,5 +318,5 @@ function setResizerObservers(filesBucket) {
 function extend(filesBucket) {
     setTreeObservers(filesBucket)
     setResizerObservers(filesBucket)
-    setVisibilityObservers(filesBucket)
+    if (options.visibilityIndicator) setVisibilityObservers(filesBucket)
 }
