@@ -233,16 +233,14 @@ function setVisibilityObservers(filesBucket, threshold = 0.001) {
         threshold: threshold
     })
 
-    // This observer will trigger every time a diff/comparison box appears
-    // It will then initiate the observation of their visibility in order to update the tree visibility indicator
     const diffObservers = new MutationObserver(function (mutations, me) {
-        mutations.flatMap(m => [...m.addedNodes]).filter(i => {
+        // The mutations will trigger every time a diff/comparison box appears.
+        // Then it initiates the observation of their visibility in order to update the tree visibility indicator
+        mutations.filter(m => m.type === "childList").flatMap(m => [...m.addedNodes]).filter(i => {
             return (i.nodeType === 1) && (i.tagName === "DIV") && i.id.startsWith("diff-")
         }).forEach(i => intersectionObserver.observe(i))
-    })
 
-    // In case a diff/comparison box appears is open, we need to adapt the tree visibility indicator accordingly.
-    const diffOpenCloseObservers = new MutationObserver(function (mutations, me) {
+        // In case a diff/comparison box appears is open, we need to adapt the tree visibility indicator accordingly.
         mutations.filter(m => m.type === "attributes").filter(m => m.target.id.startsWith("diff-")).map(m => m.target).forEach(n => {
             let fileNode = document.getElementById("file-tree-item-" + n.id)
             if (fileNode) {
@@ -254,11 +252,6 @@ function setVisibilityObservers(filesBucket, threshold = 0.001) {
     const files = document.getElementById("files");
 
     diffObservers.observe(files, {
-        childList: true,
-        subtree: true
-    })
-
-    diffOpenCloseObservers.observe(files, {
         childList: true,
         subtree: true,
         attributes: true,
