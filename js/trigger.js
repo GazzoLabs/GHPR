@@ -1,6 +1,6 @@
 function loadOnFilesBucket() {
     const filesBucketObserver = new MutationObserver(function (mutations, me) {
-        const filesBucketAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType <= 2).filter(i => i.id === "files_bucket");
+        const filesBucketAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType <= 2).filter(i => i.id === "files_bucket")
         if (filesBucketAppeared.length > 0) {
             me.disconnect()
             console.log("'files_bucket' found.")
