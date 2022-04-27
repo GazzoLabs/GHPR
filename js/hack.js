@@ -185,6 +185,8 @@ function computeAndSetFoldersDisplay(folderGraph) {
  * @param filesBucket The `#files_bucket` element.
  */
 function setTreeObservers(filesBucket) {
+    // It may sound strange to observe the tree to check that a file is reviewed (the click is on the right part of the page)
+    // But when a click is done (the review state of the file is changed), the attribute `data-file-user-viewed` is toggled.
     const nodesObserver = new MutationObserver(function (mutations, me) {
         // For js noobs like me: `.filter(x => x)` filters null values.
         const newNodes = mutations.filter(m => m.attributeName === "data-file-user-viewed").map(m => m.target).filter(li => li.id.startsWith("file-tree-item-diff-"));
@@ -209,15 +211,20 @@ function setTreeObservers(filesBucket) {
 
 
 function setVisibilityObservers(filesBucket, threshold = 0.001) {
+    // The topMargin is here because the diff/comparison boxes can hide behind the top ribbon.
+    // Extracting the height of this ribbon will help us reduce the window size.
     const topMargin = getComputedStyle(document.querySelector(".pr-toolbar")).minHeight
+
+    // Tells if a comparison diff is open or close (even if it's reviewed)
+    function isComparisonFolded(comparisonDiv) {
+        return !comparisonDiv.classList.contains("open")
+    }
 
     const intersectionObserver = new IntersectionObserver(es => { // IntersectionObserverEntry list
         Array.from(es).forEach(e => {
-            const targetId = e.target.id
-            const treeId = "file-tree-item-" + targetId
-            let fileNode = document.getElementById(treeId)
+            let fileNode = document.getElementById("file-tree-item-" + e.target.id)
             if (fileNode) {
-                fileNode.style.background = (e.intersectionRatio < threshold) || (isReviewed(fileNode)) ? "": "var(--color-action-list-item-default-selected-bg)"
+                fileNode.style.background = (e.intersectionRatio < threshold) || isComparisonFolded(e.target) ? "" : "var(--color-action-list-item-default-selected-bg)"
             }
         })
     }, {
@@ -226,20 +233,21 @@ function setVisibilityObservers(filesBucket, threshold = 0.001) {
         threshold: threshold
     })
 
-    const reviewIds = [...filesBucket.querySelectorAll('li')].filter(li => li.id.startsWith("file-tree-item-diff-")).map(li => li.id.substring(15))
-
-    const idsObserver = new MutationObserver(function (mutations, me) {
-        const idsAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType <= 2).filter(i => reviewIds.includes(i.id))
-        idsAppeared.forEach(i => intersectionObserver.observe(i))
+    // This observer will trigger every time a diff/comparison box appears
+    // It will then initiate the observation of their visibility in order to update the tree visibility indicator
+    const diffObservers = new MutationObserver(function (mutations, me) {
+        mutations.flatMap(m => [...m.addedNodes]).filter(i => {
+            return (i.nodeType === 1) && (i.tagName === "DIV") && i.id.startsWith("diff-")
+        }).forEach(i => intersectionObserver.observe(i))
     })
 
-    idsObserver.observe(filesBucket, { // TODO Use document.getElementById("files")
+    diffObservers.observe(document.getElementById("files"), {
         childList: true,
         subtree: true
     })
 
-    reviewIds.forEach(id => {
-        const e = document.getElementById(id)
+    Array.from(document.getElementById("files").querySelectorAll('div[id^="diff-"]')).forEach(n => {
+        const e = document.getElementById(n.id)
         if (e) intersectionObserver.observe(e)
     })
 }
