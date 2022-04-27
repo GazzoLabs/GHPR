@@ -241,12 +241,31 @@ function setVisibilityObservers(filesBucket, threshold = 0.001) {
         }).forEach(i => intersectionObserver.observe(i))
     })
 
-    diffObservers.observe(document.getElementById("files"), {
+    // In case a diff/comparison box appears is open, we need to adapt the tree visibility indicator accordingly.
+    const diffOpenCloseObservers = new MutationObserver(function (mutations, me) {
+        mutations.filter(m => m.type === "attributes").filter(m => m.target.id.startsWith("diff-")).map(m => m.target).forEach(n => {
+            let fileNode = document.getElementById("file-tree-item-" + n.id)
+            if (fileNode) {
+                fileNode.style.background = isComparisonFolded(n) ? "" : "var(--color-action-list-item-default-selected-bg)"
+            }
+        })
+    })
+
+    const files = document.getElementById("files");
+
+    diffObservers.observe(files, {
         childList: true,
         subtree: true
     })
 
-    Array.from(document.getElementById("files").querySelectorAll('div[id^="diff-"]')).forEach(n => {
+    diffOpenCloseObservers.observe(files, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class']
+    })
+
+    Array.from(files.querySelectorAll('div[id^="diff-"]')).forEach(n => {
         const e = document.getElementById(n.id)
         if (e) intersectionObserver.observe(e)
     })
