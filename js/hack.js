@@ -1,5 +1,5 @@
 // global variable that stores the options.
-let options;
+let options
 // var options = {
 //     hideReviewedNode: bool
 //     strikeThrough: bool
@@ -49,8 +49,8 @@ function findParentFolder(fileTreeEntry) { // TODO -> rename node + return null 
     // If it's the root node, then there is no more father.
     // Note that `root` node is not a folder or file node.
     // It's a technical html node.
-    const parentNode = fileTreeEntry.parentNode;
-    const parentNodeType = parentNode.getAttribute("data-tree-entry-type");
+    const parentNode = fileTreeEntry.parentNode
+    const parentNodeType = parentNode.getAttribute("data-tree-entry-type")
     if (parentNodeType === "root") {
         return null
     } else if (parentNodeType === "directory") {
@@ -67,7 +67,7 @@ function findParentFolder(fileTreeEntry) { // TODO -> rename node + return null 
  */
 function getText(node) {
     try {
-        const txt = node.querySelector(".ActionList-item-label");
+        const txt = node.querySelector(".ActionList-item-label")
         return txt.textContent.trim()
     } catch (err) {
         console.log("Could not find the text for some node...")
@@ -121,7 +121,7 @@ function setFolderDisplay(folderNode, isFolderReviewed) {
     setDisplay(folderNode, isFolderReviewed)
 
     function shouldClick() {
-        if (options.foldReviewedFolder){
+        if (options.foldReviewedFolder) {
             const isFolderFolded = isFolded(folderNode)
             return (isFolderReviewed && !isFolderFolded) || (!isFolderReviewed && isFolderFolded)
         } else {
@@ -163,7 +163,7 @@ function isReviewed(node) {
  */
 function getChildrenOfFolder(folderGraph) {
     // TODO make a cleaner recursive algo? At least here, we fear no "infinite" loop.
-    const level = parseInt(folderGraph.getAttribute('aria-level'));
+    const level = parseInt(folderGraph.getAttribute('aria-level'))
     const children = folderGraph.querySelectorAll('li[aria-level="' + (level + 1).toString() + '"]')
     return Array.from(children)
 }
@@ -189,19 +189,20 @@ function setTreeObservers(filesBucket) {
     // It may sound strange to observe the tree to check that a file is reviewed (the click is on the right part of the page)
     // But when a click is done (the review state of the file is changed), the attribute `data-file-user-viewed` is toggled.
     const nodesObserver = new MutationObserver(function (mutations, me) {
-        // For js noobs like me: `.filter(x => x)` filters null values.
-        const newNodes = mutations.filter(m => m.attributeName === "data-file-user-viewed").map(m => m.target).filter(li => li.id.startsWith("file-tree-item-diff-"));
-        newNodes.forEach(async node => {
+        mutations.filter(m => {
+            return (m.attributeName === "data-file-user-viewed") && m.target.id.startsWith("file-tree-item-diff-")
+        }).forEach(async m => {
+            const node = m.target
             setDisplay(node, isReviewed(node))
             computeAndSetFoldersDisplay(findParentFolder(node))
         })
-    });
+    })
 
     nodesObserver.observe(filesBucket, {
         childList: true,
         subtree: true,
         attributeFilter: ["data-file-user-viewed"]
-    });
+    })
 
     let nodes = [...filesBucket.querySelectorAll('li')].filter(li => li.id.startsWith("file-tree-item-diff-"))
     nodes.forEach(node => {
@@ -211,14 +212,15 @@ function setTreeObservers(filesBucket) {
 }
 
 /**
- * Sets all the observers required to indicaqte in the tree the diff/comparison boxes are visibile on the right.
+ * Sets all the observers required to indicate in the tree if the diff/comparison boxes are visible on the right.
  * @param filesBucket The `#files_bucket` element.
  * @param threshold A small numerical precision to check if a box is visible or not.
  */
 function setVisibilityObservers(filesBucket, threshold = 0.001) {
     // The topMargin is here because the diff/comparison boxes can hide behind the top ribbon.
     // Extracting the height of this ribbon will help us reduce the window size.
-    const topMargin = getComputedStyle(document.querySelector(".pr-toolbar")).minHeight
+    const toolBar = document.querySelector(".pr-toolbar")
+    const topMargin = toolBar ? getComputedStyle(toolBar).minHeight : "0px"
 
     // Tells if a comparison diff is open or close (even if it's reviewed)
     function isComparisonFolded(comparisonDiv) {
@@ -254,7 +256,8 @@ function setVisibilityObservers(filesBucket, threshold = 0.001) {
         })
     })
 
-    const files = document.getElementById("files");
+    const files = document.getElementById("files")
+    if (!files) return
 
     diffObservers.observe(files, {
         childList: true,
@@ -271,34 +274,34 @@ function setVisibilityObservers(filesBucket, threshold = 0.001) {
 
 
 function setResizerObservers(filesBucket) {
-    let originalStyle, customCss;
-    if (options.autoResizeSideBar) {
-        customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: auto;}');
-        const fileTreeFilterField = document.getElementById("file-tree-filter-field")
-        if (!fileTreeFilterField) return
-        originalStyle = getComputedStyle(fileTreeFilterField);
-    } else {
+    let originalStyle, customCss
+    { // scope reduction
         const fileTreeFilterField = document.getElementById("file-tree-filter-field")
         if (!fileTreeFilterField) return
         originalStyle = getComputedStyle(fileTreeFilterField)
-        customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: ' + originalStyle.width + '}');
+        if (options.autoResizeSideBar) {
+            customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: auto;}')
+        } else {
+            customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: ' + originalStyle.width + '}')
+        }
     }
 
     if (options.setResizeableSideBar) {
+        // `sideBar` should always exist since `fileTreeFilterField` has already been tested.
         let sideBar = filesBucket.querySelector('[data-target="diff-layout.sidebarContainer"]')
-        sideBar.style.borderRightStyle = "solid";
-        sideBar.style.borderRightColor = originalStyle.borderColor;
+        sideBar.style.borderRightStyle = "solid"
+        sideBar.style.borderRightColor = originalStyle.borderColor
 
-        let startX, startWidth;
+        let startX, startWidth
 
         function initDrag(event) {
             if (event.which !== 1) return // left click
-            if (event.target !== event.currentTarget) return;
+            if (event.target !== event.currentTarget) return
 
-            startX = event.clientX;
-            startWidth = parseInt(document.defaultView.getComputedStyle(sideBar).width, 10);
-            document.documentElement.addEventListener('mousemove', doDrag, false);
-            document.documentElement.addEventListener('mouseup', stopDrag, false);
+            startX = event.clientX
+            startWidth = parseInt(document.defaultView.getComputedStyle(sideBar).width, 10)
+            document.documentElement.addEventListener('mousemove', doDrag, false)
+            document.documentElement.addEventListener('mouseup', stopDrag, false)
         }
 
         function doDrag(event) {
@@ -306,13 +309,13 @@ function setResizerObservers(filesBucket) {
         }
 
         function stopDrag(event) {
-            document.documentElement.removeEventListener('mousemove', doDrag, false);
-            document.documentElement.removeEventListener('mouseup', stopDrag, false);
+            document.documentElement.removeEventListener('mousemove', doDrag, false)
+            document.documentElement.removeEventListener('mouseup', stopDrag, false)
         }
 
-        sideBar.addEventListener('mousedown', initDrag, false);
+        sideBar.addEventListener('mousedown', initDrag, false)
     }
-    console.log("Resize listeners defined.");
+    console.log("Resize listeners defined.")
 }
 
 function extend(filesBucket) {

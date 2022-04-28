@@ -1,11 +1,14 @@
 function loadOnFilesBucket() {
     const filesBucketObserver = new MutationObserver(function (mutations, me) {
-        const filesBucketAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => i.nodeType <= 2).filter(i => i.id === "files_bucket")
+        const filesBucketAppeared = mutations.flatMap(m => [...m.addedNodes]).filter(i => {
+            // Multiple pages of GitHub have the "files_bucket" component.
+            // Filtering on the "pull-request-tab-content" class should help trigger only on real pull request contexts.
+            return (i.nodeType <= 2) && (i.id === "files_bucket") && (i.classList.contains("pull-request-tab-content"))
+        })
         if (filesBucketAppeared.length > 0) {
             me.disconnect()
             console.log("'files_bucket' found.")
-            const filesBucket = filesBucketAppeared[0]
-            extend(filesBucket)
+            extend(filesBucketAppeared[0])
         }
     })
 
@@ -15,7 +18,7 @@ function loadOnFilesBucket() {
     })
 
     const filesBucket = document.getElementById("files_bucket");
-    if (filesBucket != null) {
+    if (filesBucket && filesBucket.classList.contains("pull-request-tab-content")) {
         filesBucketObserver.disconnect();
         extend(filesBucket)
     }
@@ -54,13 +57,12 @@ function loadOnTitleAppears() {
 }
 
 function main() {
-    'use strict';
+    'use strict'
     console.log("Loading the GitHub PR script")
 
     loadOnTitleAppears()
     // Loading the options before we add our listeners, resize the sidebar, etc.
     chrome.storage.local.get("options", function (result) {
-        // console.log("toto")
         options = {
             hideReviewedNode: result.options["Hide reviewed node"],
             strikeThrough: result.options["Strike through reviewed file"],
@@ -70,7 +72,6 @@ function main() {
             visibilityIndicator: result.options["Highlight visible files in tree"]
         }
     })
-
 }
 
 main()
