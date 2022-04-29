@@ -22,8 +22,7 @@
     }
   ],
   "permissions": [
-    "storage",
-    "scripting"
+    "storage"
   ],
   "action": {
     "default_popup": "html/popup.html",
