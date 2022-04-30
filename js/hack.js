@@ -17,7 +17,7 @@ let options
  * @param id The html id for the style node.
  * @returns {HTMLElement|HTMLStyleElement|null}
  */
-function addStyle(cssText, overwrite = false, id = 'GHPR-sidebar') {
+function addStyle(cssText, overwrite = false, id = 'GHPR-sidebar-position') {
     let s = document.getElementById(id)
     if (s) {
         if (overwrite) {
@@ -287,6 +287,9 @@ function setResizerObservers(filesBucket) {
     }
 
     if (options.setResizeableSideBar) {
+        const cssText = 'div[data-target="diff-layout.sidebarContainer"] { padding-right: var(--Layout-gutter) } div[data-target="diff-layout.mainContainer"] { margin-left: calc(var(--Layout-gutter) * -1) }'
+        addStyle(cssText, true,  "GHPR-sidebar-width")
+
         // `sideBar` should always exist since `fileTreeFilterField` has already been tested.
         let sideBar = filesBucket.querySelector('[data-target="diff-layout.sidebarContainer"]')
         sideBar.style.borderRightStyle = "solid"
