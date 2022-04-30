@@ -13,11 +13,11 @@ let options
  * Adds the css some iff it does not already exist.
  * If it exists, boolean value @p overwrite will decide if we actually rewrite the @p cssText.
  * @param cssText The new css text.
- * @param overwrite Will we overwrite the already existing css (in case the style already exists).
  * @param id The html id for the style node.
+ * @param overwrite Will we overwrite the already existing css (in case the style already exists).
  * @returns {HTMLElement|HTMLStyleElement|null}
  */
-function addStyle(cssText, overwrite = false, id = 'GHPR-sidebar-position') {
+function addStyle(cssText, id, overwrite = false) {
     let s = document.getElementById(id)
     if (s) {
         if (overwrite) {
@@ -280,15 +280,15 @@ function setResizerObservers(filesBucket) {
         if (!fileTreeFilterField) return
         originalStyle = getComputedStyle(fileTreeFilterField)
         if (options.autoResizeSideBar) {
-            customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: auto;}')
+            customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: auto;}', "GHPR-sidebar-position")
         } else {
-            customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: ' + originalStyle.width + '}')
+            customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: ' + originalStyle.width + '}', "GHPR-sidebar-position")
         }
     }
 
     if (options.setResizeableSideBar) {
         const cssText = 'div[data-target="diff-layout.sidebarContainer"] { padding-right: var(--Layout-gutter) } div[data-target="diff-layout.mainContainer"] { margin-left: calc(var(--Layout-gutter) * -1) }'
-        addStyle(cssText, true,  "GHPR-sidebar-width")
+        addStyle(cssText, "GHPR-sidebar-width")
 
         // `sideBar` should always exist since `fileTreeFilterField` has already been tested.
         let sideBar = filesBucket.querySelector('[data-target="diff-layout.sidebarContainer"]')
