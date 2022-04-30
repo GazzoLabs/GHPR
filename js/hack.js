@@ -274,11 +274,11 @@ function setVisibilityObservers(filesBucket, threshold = 0.001) {
 
 
 function setResizerObservers(filesBucket) {
-    let originalStyle, customCss
+    let customCss
     { // scope reduction
         const fileTreeFilterField = document.getElementById("file-tree-filter-field")
         if (!fileTreeFilterField) return
-        originalStyle = getComputedStyle(fileTreeFilterField)
+        const originalStyle = getComputedStyle(fileTreeFilterField)
         if (options.autoResizeSideBar) {
             customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: auto;}', "GHPR-sidebar-position")
         } else {
@@ -291,9 +291,9 @@ function setResizerObservers(filesBucket) {
         addStyle(cssText, "GHPR-sidebar-width")
 
         // `sideBar` should always exist since `fileTreeFilterField` has already been tested.
-        let sideBar = filesBucket.querySelector('[data-target="diff-layout.sidebarContainer"]')
-        sideBar.style.borderRightStyle = "solid"
-        sideBar.style.borderRightColor = originalStyle.borderColor
+        const sideBar = filesBucket.querySelector('[data-target="diff-layout.sidebarContainer"]')
+        // sideBar.style.borderRightStyle = "solid"
+        // sideBar.style.borderRightColor = originalStyle.borderColor
 
         let startX, startWidth
 
