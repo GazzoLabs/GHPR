@@ -287,7 +287,12 @@ function setResizerObservers(filesBucket) {
     }
 
     if (options.setResizeableSideBar) {
-        const cssText = 'div[data-target="diff-layout.sidebarContainer"] { padding-right: var(--Layout-gutter) } div[data-target="diff-layout.mainContainer"] { margin-left: calc(var(--Layout-gutter) * -1) }'
+        const sc = filesBucket.querySelector('[data-target="diff-layout.sidebarContainer"]')
+        const mc = filesBucket.querySelector('[data-target="diff-layout.mainContainer"]')
+        if (!sc || !mc) return
+        const scs = getComputedStyle(sc)
+        const mcs = getComputedStyle(mc)
+        const cssText = 'div[data-target="diff-layout.sidebarContainer"] { padding-right: calc( ' + scs.paddingRight + ' + var(--Layout-gutter)) } div[data-target="diff-layout.mainContainer"] { margin-left: calc(' + mcs.marginLeft + ' - var(--Layout-gutter)) }'
         addStyle(cssText, "GHPR-sidebar-width")
 
         // `sideBar` should always exist since `fileTreeFilterField` has already been tested.
