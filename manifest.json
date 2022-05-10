@@ -1,7 +1,7 @@
 {
   "name": "GHPR",
-  "description": "Small improvements to GitHub PRs",
-  "version": "0.2",
+  "description": "UI improvements to GitHub PRs",
+  "version": "1.0",
   "manifest_version": 3,
   "background": {
     "service_worker": "js/background.js"
