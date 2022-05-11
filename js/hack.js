@@ -307,14 +307,10 @@ function setResizerObservers(filesBucket) {
         const sideBar = filesBucket.querySelector('[data-target="diff-layout.sidebarContainer"]')
 
         const paddingRight = px2int(getComputedStyle(sideBar).paddingRight)
-        // `sideBarWidth` will be used multiple times when the mouse hovers the sidebar to detect if we are close to the gutter.
-        // Let's store is as a variable, so we do not recompute it too often.
-        // Let's recompute its size when the resizing is done.
-        let sideBarWidth = sideBar.getBoundingClientRect().width
 
         // Changes the cursor to resize, depending on the position in the side bar.
         function changeCursorStyleOnGutter(event) {
-            sideBar.style.cursor = sideBarWidth - event.offsetX < paddingRight ? "ew-resize" : ""
+            sideBar.style.cursor = sideBar.getBoundingClientRect().width - event.offsetX < paddingRight ? "ew-resize" : ""
         }
 
         function removeCursorStyle(event) {
@@ -326,7 +322,7 @@ function setResizerObservers(filesBucket) {
         function initDrag(event) {
             if (event.which !== 1) return // left click
             if (event.target !== event.currentTarget) return
-            if (sideBarWidth - event.offsetX >= paddingRight) return
+            if (sideBar.getBoundingClientRect().width - event.offsetX >= paddingRight) return
 
             sideBar.style.cursor = "ew-resize"
             sideBar.removeEventListener('mousemove', changeCursorStyleOnGutter, false)
@@ -344,7 +340,6 @@ function setResizerObservers(filesBucket) {
 
         function stopDrag(event) {
             sideBar.style.cursor = ""
-            sideBarWidth = sideBar.getBoundingClientRect().width
             sideBar.addEventListener('mousemove', changeCursorStyleOnGutter, false)
             sideBar.addEventListener('mouseout', removeCursorStyle, false)
             document.documentElement.removeEventListener('mousemove', doDrag, false)
