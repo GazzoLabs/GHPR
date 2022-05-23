@@ -69,6 +69,7 @@ function main() {
             foldReviewedFolder: result.options["Fold reviewed folder"],
             autoResizeSideBar: result.options["Auto resize sidebar"],
             setResizeableSideBar: result.options["Set sidebar resizeable"],
+            setResizeableComments: result.options["Set comments resizeable"],
             visibilityIndicator: result.options["Highlight visible files in tree"]
         }
     })
