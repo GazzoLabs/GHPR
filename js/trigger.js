@@ -64,7 +64,6 @@ function main() {
     // Loading the options before we add our listeners, resize the sidebar, etc.
     chrome.storage.local.get("options", function (result) {
         options = {
-            hideReviewedNode: result.options["Hide reviewed node"],
             strikeThrough: result.options["Strike through reviewed file"],
             foldReviewedFolder: result.options["Fold reviewed folder"],
             autoResizeSideBar: result.options["Auto resize sidebar"],

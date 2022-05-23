@@ -1,7 +1,6 @@
 // global variable that stores the options.
 let options
 // var options = {
-//     hideReviewedNode: bool
 //     strikeThrough: bool
 //     foldReviewedFolder: bool
 //     autoResizeSideBar: bool
@@ -100,9 +99,6 @@ function isFolded(folderNode) {
  * @param isReviewed The current review state of the `node`.
  */
 function setDisplay(node, isReviewed) {
-    if (options.hideReviewedNode) {
-        node.style.display = isReviewed ? "none" : ""
-    }
     let txt = node.querySelector(".ActionList-item-label")
     if (options.strikeThrough) {
         txt.style.textDecoration = isReviewed ? "line-through" : ""
