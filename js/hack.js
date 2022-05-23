@@ -6,7 +6,7 @@ let options
 //     foldReviewedFolder: bool
 //     autoResizeSideBar: bool
 //     setResizeableSideBar: bool
-//     setResizeableComments: bool
+//     setCommentsSizeToFit: bool
 //     visibilityIndicator: bool
 // }
 
@@ -356,80 +356,16 @@ function setResizerObservers(filesBucket) {
     console.log("Resize listeners defined.")
 }
 
-function setCommentsResizerObservers(filesBucket) {
-
-    // Sets the resize cursor when the pointer is at the bottom of the comment box.
-    function setResizeCursor(event, commBox) {
-        // We take the last element child because there may be multiple children and in that case it's always the last.
-        if (!commBox.lastElementChild.classList.contains("js-line-comments")) return
-        const rect = commBox.getBoundingClientRect() // Give commBox and do not take the event?
-        const style = getComputedStyle(commBox)
-        commBox.style.cursor = rect.height - event.offsetY < px2int(style.paddingBottom) + px2int(style.borderBottomWidth) ? "ns-resize" : ""
-    }
-
-    // When leaving the comment box, cursor it no more resize.
-    function unsetResizeCursor(commBox) {
-        if (!commBox.lastElementChild.classList.contains("js-line-comments")) return
-        commBox.style.cursor = ""
-    }
-
-    let startY, startHeight, commentBox
-
-    function initDrag(event) {
-        if (event.which !== 1) return // left click
-        if (event.target !== event.currentTarget) return
-
-        // This "algo" is stupidly long.
-        // It could be shorter if I did not want to deal with unrealistic corner cases like
-        // - both comment on addition and deletion panes or
-        // - multiple comments in the same line.
-
-        // First we select only the comments (the `querySelectorAll`) that are "open" (the `filter`)
-        const commentBoxes = Array.from(
-            event.target.closest("tr").querySelectorAll('textarea[name="comment[body]"]')
-        ).filter(
-            cbx => cbx.id.includes("new_inline_comment_diff")
-        )
-        // There we may have two boxes (deletion or addition) on the same line, let's find which was clicked.
-        const p0 = commentBoxes[0].closest("td")
-        if (event.target === p0) {
-            commentBox = commentBoxes[0];
-        } else if (event.target === commentBoxes[1].closest("td")) { // Do not take p1 until you need it/know it exists.
-            commentBox = commentBoxes[1];
-        } else {
-            // Strange...
-            return
-        }
-        // Now we know which comBox has been dragged.
-        // We'll do something if we are at it's bottom.
-        const style = getComputedStyle(commentBox)
-        if (commentBox.getBoundingClientRect().height - event.offsetY > px2int(style.paddingBottom) + px2int(style.borderBottomWidth)) return
-        // Let's define the cursor at document level. This will be removed in the stopDrag.
-        document.body.style.cursor = "ns-resize"
-
-        startY = event.clientY
-        startHeight = parseInt(getComputedStyle(commentBox).height, 10)
-        document.documentElement.addEventListener('mousemove', doDrag, false)
-        document.documentElement.addEventListener('mouseup', stopDrag, false)
-    }
-
-    function doDrag(event) {
-        commentBox.style.height = (startHeight + event.clientY - startY) + "px"
-    }
-
-    function stopDrag(event) {
-        document.body.style.cursor = ""
-        document.documentElement.removeEventListener('mousemove', doDrag, false)
-        document.documentElement.removeEventListener('mouseup', stopDrag, false)
-    }
-
+function setCommentsSizeToFitObservers(filesBucket) {
     const commentBoxObserver = new MutationObserver(function (mutations, me) {
         mutations.flatMap(m => [...m.addedNodes]).filter(i => {
             return i.nodeType == 1 && (i.classList.contains("js-addition") || i.classList.contains("js-deletion")) && i.hasChildNodes()
         }).forEach(i => {
-            i.addEventListener('mousedown', initDrag, false)
-            i.addEventListener('mousemove', e => setResizeCursor(e, i), false)
-            i.addEventListener('mouseout', e => unsetResizeCursor(i), false)
+            Array.from( // This list is here to deal with the case we cannot find any child.
+                i.querySelectorAll('textarea[name="comment[body]"]')
+            ).forEach(
+                ta => ta.classList.add('js-size-to-fit')
+            )
         })
     })
 
@@ -443,5 +379,5 @@ function extend(filesBucket) {
     setTreeObservers(filesBucket)
     setResizerObservers(filesBucket)
     if (options.visibilityIndicator) setVisibilityObservers(filesBucket)
-    if (options.setResizeableComments) setCommentsResizerObservers(filesBucket)
+    if (options.setCommentsSizeToFit) setCommentsSizeToFitObservers(filesBucket)
 }
