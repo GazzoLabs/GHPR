@@ -308,7 +308,7 @@ function setResizerObservers(filesBucket) {
 
         const paddingRight = px2int(getComputedStyle(sideBar).paddingRight)
 
-        // Changes the cursor to resize, depending on the position in the side bar.
+        // Changes the cursor to resize, depending on the position in the sidebar.
         function changeCursorStyleOnGutter(event) {
             sideBar.style.cursor = sideBar.getBoundingClientRect().width - event.offsetX < paddingRight ? "ew-resize" : ""
         }
@@ -324,9 +324,7 @@ function setResizerObservers(filesBucket) {
             if (event.target !== event.currentTarget) return
             if (sideBar.getBoundingClientRect().width - event.offsetX >= paddingRight) return
 
-            sideBar.style.cursor = "ew-resize"
-            sideBar.removeEventListener('mousemove', changeCursorStyleOnGutter, false)
-            sideBar.removeEventListener('mouseout', removeCursorStyle, false)
+            document.body.style.cursor = "ew-resize"
 
             startX = event.clientX
             startWidth = parseInt(getComputedStyle(sideBar).width, 10)
@@ -335,13 +333,16 @@ function setResizerObservers(filesBucket) {
         }
 
         function doDrag(event) {
-            customCss.textContent = '.Layout--flowRow-until-lg {--Layout-sidebar-width: ' + (startWidth + event.clientX - startX) + 'px;}'
+            // Instead of defining the size in the css and let everything be recomputed during the drag,
+            // Let's resize explicitly the sidebar for performance.
+            // The main container will not be progressively resized during the downsizing of the sidebar,
+            // but it will be eventually through the appropriate css actions in the stopDrag.
+            sideBar.style.width = (startWidth + event.clientX - startX) + 'px'
         }
 
         function stopDrag(event) {
-            sideBar.style.cursor = ""
-            sideBar.addEventListener('mousemove', changeCursorStyleOnGutter, false)
-            sideBar.addEventListener('mouseout', removeCursorStyle, false)
+            document.body.style.cursor = ""
+            customCss.textContent = '.Layout--flowRow-until-lg {--Layout-sidebar-width: ' + (startWidth + event.clientX - startX) + 'px;}'
             document.documentElement.removeEventListener('mousemove', doDrag, false)
             document.documentElement.removeEventListener('mouseup', stopDrag, false)
         }
