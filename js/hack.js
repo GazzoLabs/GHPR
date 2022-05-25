@@ -5,7 +5,6 @@ let options
 //     foldReviewedFolder: bool
 //     autoResizeSideBar: bool
 //     setResizeableSideBar: bool
-//     setCommentsSizeToFit: bool
 //     visibilityIndicator: bool
 // }
 
@@ -352,28 +351,8 @@ function setResizerObservers(filesBucket) {
     console.log("Resize listeners defined.")
 }
 
-function setCommentsSizeToFitObservers(filesBucket) {
-    const commentBoxObserver = new MutationObserver(function (mutations, me) {
-        mutations.flatMap(m => [...m.addedNodes]).filter(i => {
-            return i.nodeType == 1 && (i.classList.contains("js-addition") || i.classList.contains("js-deletion")) && i.hasChildNodes()
-        }).forEach(i => {
-            Array.from( // This list is here to deal with the case we cannot find any child.
-                i.querySelectorAll('textarea[name="comment[body]"]')
-            ).forEach(
-                ta => ta.classList.add('js-size-to-fit')
-            )
-        })
-    })
-
-    commentBoxObserver.observe(filesBucket, {
-        childList: true,
-        subtree: true
-    })
-}
-
 function extend(filesBucket) {
     setTreeObservers(filesBucket)
     setResizerObservers(filesBucket)
     if (options.visibilityIndicator) setVisibilityObservers(filesBucket)
-    if (options.setCommentsSizeToFit) setCommentsSizeToFitObservers(filesBucket)
 }

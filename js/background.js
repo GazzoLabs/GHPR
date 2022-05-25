@@ -4,7 +4,6 @@ chrome.runtime.onInstalled.addListener(() => {
         "Fold reviewed folder": true,
         "Auto resize sidebar": true,
         "Set sidebar resizeable": true,
-        "Set comments size-to-fit": true,
         "Highlight visible files in tree": true
     }
 
