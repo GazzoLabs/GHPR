@@ -5,5 +5,5 @@ convert -background none -resize ${i}x${i} icon.svg icon-${i}x${i}.png
 done
 
 # Poor man bundling
-rm -fr .git .idea .DS_Store notes.txt notes.txt images/icon.svg
+rm -fr .git .idea .DS_Store notes.txt notes.txt images/icon.svg doc/* README.md
 zip -r GHPR.zip GHPR
