@@ -1,4 +1,4 @@
-UI improvements to GitHub PRs
+The GHPR browser extension improves the UI of GitHub PRs. Install from [here](https://chrome.google.com/webstore/detail/ghpr/jjgkfpddhaceehkhobjpokkgbdhendde).
 - Adapts the PR sidebar to the lengths of the file names;
 - Lets you resize the sidebar yourself;
 - Dims and folds reviewed files and folders in the pull request tree;
