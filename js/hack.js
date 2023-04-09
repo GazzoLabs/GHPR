@@ -99,6 +99,10 @@ function isFolded(folderNode) {
  */
 function setDisplay(node, isReviewed) {
     let txt = node.querySelector(".ActionList-item-label")
+    if (!txt) {
+        console.log("Could not query text for tree node.")
+        return
+    }
     if (options.strikeThrough) {
         txt.style.textDecoration = isReviewed ? "line-through" : ""
     }
@@ -182,6 +186,11 @@ function computeAndSetFoldersDisplay(folderGraph) {
  * @param filesBucket The `#files_bucket` element.
  */
 function setTreeObservers(filesBucket) {
+    function f(node) {  // Setting the display of a node. Code factorization within the current function.
+        setDisplay(node, isReviewed(node))
+        computeAndSetFoldersDisplay(findParentFolder(node))
+    }
+
     // It may sound strange to observe the tree to check that a file is reviewed (the click is on the right part of the page)
     // But when a click is done (the review state of the file is changed), the attribute `data-file-user-viewed` is toggled.
     const nodesObserver = new MutationObserver(function (mutations, me) {
@@ -189,8 +198,7 @@ function setTreeObservers(filesBucket) {
             return (m.attributeName === "data-file-user-viewed") && m.target.id.startsWith("file-tree-item-diff-")
         }).forEach(async m => {
             const node = m.target
-            setDisplay(node, isReviewed(node))
-            computeAndSetFoldersDisplay(findParentFolder(node))
+            f(node)
         })
     })
 
@@ -201,10 +209,7 @@ function setTreeObservers(filesBucket) {
     })
 
     let nodes = [...filesBucket.querySelectorAll('li')].filter(li => li.id.startsWith("file-tree-item-diff-"))
-    nodes.forEach(node => {
-        setDisplay(node, isReviewed(node))
-        computeAndSetFoldersDisplay(findParentFolder(node))
-    })
+    nodes.forEach(f)
 }
 
 /**
@@ -253,7 +258,10 @@ function setVisibilityObservers(filesBucket, threshold = 0.001) {
     })
 
     const files = document.getElementById("files")
-    if (!files) return
+    if (!files) {
+        console.log("'files' could not be found. Not observing visibility changes.")
+        return
+    }
 
     diffObservers.observe(files, {
         childList: true,
@@ -281,31 +289,41 @@ function setResizerObservers(filesBucket) {
     let customCss
     { // scope reduction
         const fileTreeFilterField = document.getElementById("file-tree-filter-field")
-        if (!fileTreeFilterField) return
-        const originalStyle = getComputedStyle(fileTreeFilterField)
+        if (!fileTreeFilterField) {
+            console.log("'file-tree-filter-field' was not found. Sidebar resizing may not be working.")
+            return
+        }
         if (options.autoResizeSideBar) {
+            console.log("Auto resizing the side bar.")
             customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: auto;}', "GHPR-sidebar-position")
         } else {
+            const originalStyle = getComputedStyle(fileTreeFilterField)
             customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: ' + originalStyle.width + '}', "GHPR-sidebar-position")
         }
     }
 
     if (options.setResizeableSideBar) {
-        const sc = filesBucket.querySelector('[data-target="diff-layout.sidebarContainer"]')
-        const mc = filesBucket.querySelector('[data-target="diff-layout.mainContainer"]')
-        if (!sc || !mc) return
-        const scs = getComputedStyle(sc)
-        const mcs = getComputedStyle(mc)
-        const cssText = 'div[data-target="diff-layout.sidebarContainer"] { padding-right: calc( ' + scs.paddingRight + ' + var(--Layout-gutter)) } div[data-target="diff-layout.mainContainer"] { margin-left: calc(' + mcs.marginLeft + ' - var(--Layout-gutter)) }'
+        console.log("Defining the resizing listeners.")
+        const sideBar = filesBucket.querySelector('[data-target="diff-layout.sidebarContainer"]')
+        const mainPane = filesBucket.querySelector('[data-target="diff-layout.mainContainer"]')
+        if (!sideBar || !mainPane) {
+            console.log("Side or main panes of 'files_bucket' are not available.")
+            return
+        }
+        const sbs = getComputedStyle(sideBar)
+        const mps = getComputedStyle(mainPane)
+        const cssText = 'div[data-target="diff-layout.sidebarContainer"] { padding-right: calc( ' + sbs.paddingRight + ' + var(--Layout-gutter)) } div[data-target="diff-layout.mainContainer"] { margin-left: calc(' + mps.marginLeft + ' - var(--Layout-gutter)) }'
         addStyle(cssText, "GHPR-sidebar-width")
 
-        // `sideBar` should always exist since `fileTreeFilterField` has already been tested.
-        const sideBar = filesBucket.querySelector('[data-target="diff-layout.sidebarContainer"]')
-
-        const paddingRight = px2int(getComputedStyle(sideBar).paddingRight)
+        // We define a variable that will eventually be defined.
+        // But right now may be too soon since some set up is still to be done.
+        let paddingRight = null
 
         // Changes the cursor to resize, depending on the position in the sidebar.
         function changeCursorStyleOnGutter(event) {
+            if (paddingRight === null) {
+                paddingRight = px2int(getComputedStyle(sideBar).paddingRight)
+            }
             sideBar.style.cursor = sideBar.getBoundingClientRect().width - event.offsetX < paddingRight ? "ew-resize" : ""
         }
 
@@ -316,6 +334,9 @@ function setResizerObservers(filesBucket) {
         let startX, startWidth
 
         function initDrag(event) {
+            if (paddingRight === null) {
+                paddingRight = px2int(getComputedStyle(sideBar).paddingRight)
+            }
             if (event.which !== 1) return // left click
             if (event.target !== event.currentTarget) return
             if (sideBar.getBoundingClientRect().width - event.offsetX >= paddingRight) return
@@ -347,8 +368,8 @@ function setResizerObservers(filesBucket) {
         sideBar.addEventListener('mouseout', removeCursorStyle, false)
 
         sideBar.addEventListener('mousedown', initDrag, false)
+        console.log("Resizing listeners defined.")
     }
-    console.log("Resize listeners defined.")
 }
 
 function extend(filesBucket) {
