@@ -2,15 +2,15 @@ function loadOnFilesBucket() {
     console.log("Setting files bucket observers")
     const filesBucketObserver = new MutationObserver(function (mutations, me) {
         const filesBucketAppeared = mutations.filter(m => {
-            // The #files_bucket div is inside another #repo-content-turbo-frame that is added.
-            // It could be as simple as only checking for #files_bucket,
-            // but the first id check was added not to search the tree everytime.
-            // In case the extension does not trigger anymore, it can be interesting to challenge the following predicate.
-            return m.target.id === "repo-content-turbo-frame" && m.target.querySelector("#files_bucket")
+            // In order not to miss the files bucket, we search for it for any mutation.
+            // But we also check that it's filled with tree nodes.
+            // As such we should always trigger with a filled files bucket.
+            const fb = m.target.querySelector("#files_bucket")
+            return fb && fb.getElementsByTagName("file-tree").length > 0
         })
         if (filesBucketAppeared.length > 0) {
             me.disconnect()
-            console.log("'files_bucket' found.")
+            console.log("Filled 'files_bucket' found.")
             extend(document.getElementById("files_bucket"))
         }
     })
