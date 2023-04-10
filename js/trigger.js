@@ -1,12 +1,17 @@
 function loadOnFilesBucket() {
     console.log("Setting files bucket observers")
+
+    function isFilesBucketReady(fb) {
+        // A page will be a PR page if there's a `#files_bucket` element
+        // which contains `file-tree` nodes.
+        // There may be cases where the `#files_bucket` element it there
+        // but not its tree nodes. In that precise case, we wait for the tree nodes to appear.
+        return fb && fb.getElementsByTagName("file-tree").length > 0
+    }
     const filesBucketObserver = new MutationObserver(function (mutations, me) {
         const filesBucketAppeared = mutations.filter(m => {
-            // In order not to miss the files bucket, we search for it for any mutation.
-            // But we also check that it's filled with tree nodes.
-            // As such we should always trigger with a filled files bucket.
-            const fb = m.target.querySelector("#files_bucket")
-            return fb && fb.getElementsByTagName("file-tree").length > 0
+            // In order not to miss the files bucket, we _search_ for it for any mutation.
+            return isFilesBucketReady(m.target.querySelector("#files_bucket"))
         })
         if (filesBucketAppeared.length > 0) {
             me.disconnect()
@@ -20,8 +25,9 @@ function loadOnFilesBucket() {
         subtree: true
     })
 
+    // In case the observer is late, we perform another check here.
     const filesBucket = document.getElementById("files_bucket");
-    if (filesBucket && filesBucket.classList.contains("pull-request-tab-content")) {
+    if (isFilesBucketReady(filesBucket)) {
         filesBucketObserver.disconnect();
         extend(filesBucket)
     }
