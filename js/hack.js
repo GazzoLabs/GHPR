@@ -286,20 +286,10 @@ function px2int(length) {
 }
 
 function setResizerObservers(filesBucket) {
-    let customCss
-    { // scope reduction
-        const fileTreeFilterField = document.getElementById("file-tree-filter-field")
-        if (!fileTreeFilterField) {
-            console.log("'file-tree-filter-field' was not found. Sidebar resizing may not be working.")
-            return
-        }
-        if (options.autoResizeSideBar) {
-            console.log("Auto resizing the side bar.")
-            customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: auto;}', "GHPR-sidebar-position")
-        } else {
-            const originalStyle = getComputedStyle(fileTreeFilterField)
-            customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: ' + originalStyle.width + '}', "GHPR-sidebar-position")
-        }
+    let customCss = null
+    if (options.autoResizeSideBar) {
+        console.log("Auto resizing the side bar.")
+        customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: auto;}', "GHPR-sidebar-position")
     }
 
     if (options.setResizeableSideBar) {
@@ -358,6 +348,10 @@ function setResizerObservers(filesBucket) {
         }
 
         function stopDrag(event) {
+            if (!customCss) {
+                const originalStyle = getComputedStyle(document.getElementById("file-tree-filter-field"))
+                customCss = addStyle('.Layout--flowRow-until-lg {--Layout-sidebar-width: ' + originalStyle.width + '}', "GHPR-sidebar-position")
+            }
             document.body.style.cursor = ""
             customCss.textContent = '.Layout--flowRow-until-lg {--Layout-sidebar-width: ' + (startWidth + event.clientX - startX) + 'px;}'
             document.documentElement.removeEventListener('mousemove', doDrag, false)
